@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo -e "Content-type: application/json\nAccess-Control-Allow-Origin: *\n\n"
+exec mbstatus

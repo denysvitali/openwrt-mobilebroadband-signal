@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Signal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="signal-chart">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script type="text/javascript">
+        async function doUpdate(){
+            let req = new Request("/cgi-bin/signal")
+            let res = await fetch(req);
+
+            if (res.status != 200) {
+                console.error(`Invalid status code ${res.status} received`)
+                return
+            }
+
+            let json = await res.json();
+
+            let data = chart.data;
+            data.labels.push(new Date().toLocaleTimeString())
+            data.datasets[0].data.push(json.signal.lte.rsrp)
+            data.datasets[1].data.push(json.signal.lte.rsrq)
+            data.datasets[2].data.push(json.signal.lte.rssi)
+            data.datasets[3].data.push(json.signal.lte.snr)
+            chart.update()
+        }
+
+
+        const ctx = document.getElementById('chart');
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                        label: 'RSSRP',
+                        data: [],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'RSRQ',
+                        data: [],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'RSSI',
+                        data: [],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'SNR',
+                        data: [],
+                        borderWidth: 1
+                    },
+                ]
+            },
+        })
+
+        doUpdate()
+        setInterval(doUpdate, 5 * 1000);
+    </script>
+</body>
+
+</html>
